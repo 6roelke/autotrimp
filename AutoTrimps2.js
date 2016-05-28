@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         AutoTrimpsV2+genBTC
+// @name         AutoTrimpsV2+genBTC-BetaDev
 // @namespace    http://tampermonkey.net/
-// @version      2.1.1-genbtc-stable-5-21-2016
+// @version      2.1.2b-genbtc-BETA-5-28-2016
 // @description  try to take over the world!
 // @author       zininzinin, spindrjr, belaith, ishakaru, genBTC
 // @include        *trimps.github.io*
