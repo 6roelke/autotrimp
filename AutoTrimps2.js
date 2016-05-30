@@ -1893,24 +1893,20 @@ function storeRecycledNullfiumData(){
     }
 }
 
-var lastHelium = 0;
-var lastZone = 0;
 function autoPortal() {
     switch (autoTrimpSettings.AutoPortal.selected) {
         //portal if we have lower He/hr than the previous zone
         case "Helium Per Hour":
-            if(game.global.world > lastZone) {
-                lastZone = game.global.world;
-                var timeThisPortal = new Date().getTime() - game.global.portalTime;
-                timeThisPortal /= 3600000;
-                var myHelium = Math.floor(game.resources.helium.owned / timeThisPortal);
+            game.stats.bestHeliumHourThisRun.evaluate();    //normally, evaluate() is only called once per second, but the script runs at 10x a second.
+            if(game.global.world > game.stats.bestHeliumHourThisRun.atZone) {
+                var bestHeHr = game.stats.bestHeliumHourThisRun.storedValue;
+                var myHeliumHr = game.stats.heliumHour.value()
                 var heliumHrBuffer = Math.abs(getPageSetting('HeliumHrBuffer'));
-                if(myHelium < lastHelium * (1-(heliumHrBuffer/100)) && !game.global.challengeActive) {
+                if(myHeliumHr < bestHeHr * (1-(heliumHrBuffer/100)) && !game.global.challengeActive) {
                     pushData(); storeRecycledNullfiumData();
                     if(autoTrimpSettings.HeliumHourChallenge.selected != 'None') doPortal(autoTrimpSettings.HeliumHourChallenge.selected);
                     else doPortal();
                 }
-                else lastHelium = myHelium;
             }
             break;
         case "Balance":
