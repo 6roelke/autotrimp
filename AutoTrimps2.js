@@ -1647,8 +1647,8 @@ function autoMap() {
                 //run the prison only if we are 'cleared' to run level 80 + 1 level per 200% difficulty. Could do more accurate calc if needed
                 if(theMap.name == 'The Prison' && (game.global.challengeActive == "Electricity" || game.global.challengeActive == "Mapocalypse")) {
                     var prisonDifficulty = Math.ceil(theMap.difficulty / 2);
-                    doPrison = true;
                     if(game.global.world >= 80 + prisonDifficulty) {
+                        doPrison = true;
                         shouldDoMap = theMap.id;
                         break;
                     }
@@ -1876,23 +1876,6 @@ function calculateNextHeliumHour (stacked) {
     return heliumNow;
 }
 
-var heliumGrowing = false;
-var strikes = 0;
-var heliumWatch= 0;
-
-function storeRecycledNullfiumData(){
-    if (nullifiumData == null) {
-        debug("Could not find nullifium data storage!(not good). Creating now.");
-        var nullifiumData = [];        
-    }
-    if (nullifiumData.length === 0 || nullifiumData[nullifiumData.length - 1].totalPortals != game.global.totalPortals) {
-        nullifiumData.push({totalPortals: game.global.totalPortals, recycledNullifium: recycleAllExtraHeirlooms(true), portalTime: new Date().getTime() - game.global.portalTime});
-        debug("Gathered nullifium graph data.");
-        localStorage.setItem('nullifiumData', JSON.stringify(nullifiumData));
-        debug("Stored nullifium graph data into localstorage.");
-    }
-}
-
 function autoPortal() {
     switch (autoTrimpSettings.AutoPortal.selected) {
         //portal if we have lower He/hr than the previous zone
@@ -1903,73 +1886,45 @@ function autoPortal() {
                 var myHeliumHr = game.stats.heliumHour.value()
                 var heliumHrBuffer = Math.abs(getPageSetting('HeliumHrBuffer'));
                 if(myHeliumHr < bestHeHr * (1-(heliumHrBuffer/100)) && !game.global.challengeActive) {
-                    pushData(); storeRecycledNullfiumData();
-                    if(autoTrimpSettings.HeliumHourChallenge.selected != 'None') doPortal(autoTrimpSettings.HeliumHourChallenge.selected);
-                    else doPortal();
+                    debug("My Helium was: " + myHeliumHr + " & the Best Helium was: " + bestHeHr);
+                    pushData();
+                    if(autoTrimpSettings.HeliumHourChallenge.selected != 'None') 
+                        doPortal(autoTrimpSettings.HeliumHourChallenge.selected);
+                    else 
+                        doPortal();
                 }
-            }
-            break;
-        case "Balance":
-            if(game.global.world > 40 && !game.global.challengeActive) {
-                pushData(); storeRecycledNullfiumData();
-                doPortal('Balance');
-            }
-            break;
-        case "Electricity":
-            //if doPrison is true, autoMaps sent us in there because of electricity
-            if(doPrison && !game.global.challengeActive) {
-                pushData(); storeRecycledNullfiumData();
-                doPortal('Electricity');
-                doPrison = false;
-            }
-            break;
-        case "Crushed":
-            //if doWonderland is true, autoMaps sent us in there because of crushed
-            if(doWonderland && !game.global.challengeActive) {
-                pushData(); storeRecycledNullfiumData();
-                doPortal('Crushed');
-                doWonderland = false;
-            }
-            break;
-        case "Nom":
-            if(game.global.world > 145 && !game.global.challengeActive) {
-                pushData(); storeRecycledNullfiumData();
-                doPortal('Nom');
-            }
-            break;
-        case "Toxicity":
-            if(game.global.world > 165 && !game.global.challengeActive) {
-                if (getPageSetting('MaxTox'))
-                    settingChanged("MaxTox");
-                pushData(); storeRecycledNullfiumData();
-                doPortal('Toxicity');
-            }
-            break;
-        case "Watch":
-            if(game.global.world > 180 && !game.global.challengeActive) {
-                pushData(); storeRecycledNullfiumData();
-                doPortal('Watch');
-            }
-            break;
-        case "Lead":
-            if(game.global.world > 180 && !game.global.challengeActive) {
-                pushData(); storeRecycledNullfiumData();
-                doPortal('Lead');
             }
             break;
         case "Custom":
             if(game.global.world > getPageSetting('CustomAutoPortal') && !game.global.challengeActive) {
-                pushData(); storeRecycledNullfiumData();
-                if(autoTrimpSettings.HeliumHourChallenge.selected != 'None') doPortal(autoTrimpSettings.HeliumHourChallenge.selected);
-                else doPortal();
+                pushData();
+                if(autoTrimpSettings.HeliumHourChallenge.selected != 'None')
+                    doPortal(autoTrimpSettings.HeliumHourChallenge.selected);
+                else
+                    doPortal();
+            }
+            break;
+        case "Balance":
+        case "Electricity":
+        case "Crushed":
+        case "Nom":
+        case "Toxicity":
+        case "Watch":
+        case "Lead":
+            if(!game.global.challengeActive) {
+                pushData();
+                doPortal(autoTrimpSettings.AutoPortal.selected);
+                doPrison = false;
+                doWonderland = false;
             }
             break;
         default:
             break;
-            
+
     }
-    
+
 }
+
 
 function checkSettings() {
     var portalLevel = -1;
@@ -2019,8 +1974,6 @@ function doPortal(challenge) {
     if(challenge) selectChallenge(challenge);
     activateClicked();
     activatePortal();
-    lastHelium = 0;
-    lastZone = 0;
 }
 
 //adjust geneticists to reach desired breed timer
