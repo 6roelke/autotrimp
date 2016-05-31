@@ -1300,7 +1300,7 @@ function autoStance() {
     var newSquadRdy = game.resources.trimps.realMax() <= game.resources.trimps.owned + 1;
 
     
-    baseDamage = game.global.soldierCurrentAttack * 2 * (1 + (game.global.achievementBonus / 100)) * ((game.global.antiStacks * game.portal.Anticipation.level * game.portal.Anticipation.modifier) + 1) * (1 + (game.global.roboTrimpLevel * 0.2));
+    baseDamage = game.global.soldierCurrentAttack * (1 + (game.global.achievementBonus / 100)) * ((game.global.antiStacks * game.portal.Anticipation.level * game.portal.Anticipation.modifier) + 1) * (1 + (game.global.roboTrimpLevel * 0.2));
     if (game.global.formation == 2) {
         baseDamage /= 4;
     } else if (game.global.formation != "0") {
@@ -1394,7 +1394,7 @@ function autoStance() {
         xDamage += game.global.soldierHealth * 0.2;
         bDamage += game.global.soldierHealth * 0.2;
     }
-    baseDamage *= (game.global.titimpLeft > 0 ? 4 : 2); //consider titimp (reasoning behind 8 and 4: Dstance is *4, and titimp *2 = 8). (used to be 4&2 but there was a questionable  *2 in the original basedamage equation)
+    baseDamage *= (game.global.titimpLeft > 0 ? 2 : 1); //consider titimp
     //double attack is OK if the buff isn't double attack, or we will survive a double attack, or we are going to one-shot them (so they won't be able to double attack)
     var doubleAttackOK = game.global.voidBuff != 'doubleAttack' || ((newSquadRdy && dHealth > dDamage * 2) || dHealth - missingHealth > dDamage * 2) || enemyHealth < baseDamage;
     //lead attack ok if challenge isn't lead, or we are going to one shot them, or we can survive the lead damage
@@ -1451,9 +1451,6 @@ function autoStance() {
 }
 
 //core function written by Belaith
-//prison/wonderland flags for use in autoPortal function
-var doPrison = false;
-var doWonderland = false;
 var stackingTox = false;
 var doVoids = false;
 var needToVoid = false;
@@ -1464,15 +1461,19 @@ var HDratio = 0;
 function autoMap() {
     //allow script to handle abandoning
     if(game.options.menu.alwaysAbandon.enabled == 1) toggleSetting('alwaysAbandon');
-        
+
+    //calculate average crits
+    baseDamage = (baseDamage * (1-getPlayerCritChance()) + (baseDamage * getPlayerCritChance() * getPlayerCritDamageMult()))/2;
+    //calculate with map bonus
     var mapbonusmulti = 1 + (0.20*game.global.mapBonus);
     baseDamage *= mapbonusmulti;
-    //farm if basedamage is between 10 and 16)
+    
+    //farm between 20 and 32)
     if(!getPageSetting('DisableFarm')) {
-        shouldFarm = shouldFarm ? getEnemyMaxHealth(game.global.world) / (baseDamage*4) > 2.5 : getEnemyMaxHealth(game.global.world) / (baseDamage*4) > 4;
+        shouldFarm = shouldFarm ? getEnemyMaxHealth(game.global.world) / baseDamage > 20 : getEnemyMaxHealth(game.global.world) / baseDamage > 32;
     }
 
-    needToVoid = getPageSetting('VoidMaps') > 0 && game.global.totalVoidMaps > 0 && ((game.global.world == getPageSetting('VoidMaps') && !getPageSetting('RunNewVoids')) || (game.global.world >= getPageSetting('VoidMaps') && getPageSetting('RunNewVoids'))) && (game.global.challengeActive != 'Lead' || game.global.lastClearedCell > 93);
+    needToVoid = getPageSetting('VoidMaps') > 0 && game.global.totalVoidMaps > 0 && ((game.global.world == getPageSetting('VoidMaps') && !getPageSetting('RunNewVoids')) || (game.global.world >= getPageSetting('VoidMaps') && getPageSetting('RunNewVoids'))) && (game.global.challengeActive != 'Lead' || game.global.lastClearedCell > 95);
     if (game.global.mapsUnlocked) {
         var enemyDamage = getEnemyMaxAttack(game.global.world + 1, 30, 'Snimp', .85);
         var enemyHealth = getEnemyMaxHealth(game.global.world + 1);
@@ -1494,7 +1495,7 @@ function autoMap() {
             }
             pierceMod += (game.challenges.Lead.stacks * 0.001);
             baseDamage /= mapbonusmulti;
-            shouldFarm = shouldFarm ? enemyHealth / (baseDamage*4) > 2.5 : enemyHealth / (baseDamage*4) > 2.5;
+            shouldFarm = enemyHealth / baseDamage > 4;
         }
         if(game.global.totalVoidMaps == 0 || !needToVoid)
             doVoids = false;
@@ -1502,8 +1503,9 @@ function autoMap() {
         enoughHealth = (baseHealth * 4 > 30 * (enemyDamage - baseBlock / 2 > 0 ? enemyDamage - baseBlock / 2 : enemyDamage * (0.2 + pierceMod))
                         || 
                         baseHealth > 30 * (enemyDamage - baseBlock > 0 ? enemyDamage - baseBlock : enemyDamage * (0.2 + pierceMod)));
+        console.log("EnoughHealth: " + enoughHealth + " " + enemyDamage + " " + baseDamage);                  
         enoughDamage = baseDamage * 4 > enemyHealth;
-        HDratio = getEnemyMaxHealth(game.global.world) / baseDamage;
+        HDratio = enemyHealth / baseDamage;
         //prevents map-screen from flickering on and off during startup when base damage is 0.
         if (baseDamage > 0){
             var shouldDoMaps = !enoughHealth || !enoughDamage;
@@ -1648,7 +1650,6 @@ function autoMap() {
                 if(theMap.name == 'The Prison' && (game.global.challengeActive == "Electricity" || game.global.challengeActive == "Mapocalypse")) {
                     var prisonDifficulty = Math.ceil(theMap.difficulty / 2);
                     if(game.global.world >= 80 + prisonDifficulty) {
-                        doPrison = true;
                         shouldDoMap = theMap.id;
                         break;
                     }
@@ -1664,7 +1665,6 @@ function autoMap() {
                 if(theMap.name == 'Bionic Wonderland' && game.global.challengeActive == "Crushed" ) {
                     var wonderlandDifficulty = Math.ceil(theMap.difficulty / 2);
                     if(game.global.world >= 125 + wonderlandDifficulty) {
-                        doWonderland = true;
                         shouldDoMap = theMap.id;
                         break;
                     }
@@ -1730,9 +1730,11 @@ function autoMap() {
                 }
             } else if (!game.global.mapsActive) {
                 if (shouldDoMap != "world") {
-                    //if shouldFarm, don't switch until after megamining //genBTC changed.
-                    if (!game.global.switchToMaps && ((shouldFarm && game.global.lastClearedCell >= 59) || !shouldFarm)) {
-                        mapsClicked();
+                    //if shouldFarm, don't switch until after megamining. if "wants damage", go in first 5 cells of zone (do map bonus simultaneously)
+                    //if need prestige, go immediately.
+                    if (!game.global.switchToMaps){
+                        if ((!enoughDamage && game.global.lastClearedCell < 5) || (shouldFarm && game.global.lastClearedCell >= 59) || needPrestige || doVoids || shouldDoMap!="world")
+                            mapsClicked();
                     }
                     ////Get Impatient/Abandon if: need prestige / _NEED_ to do void maps / on lead in odd world. AND a new army is ready, OR _need_ to void map OR lead farming and we're almost done with the zone )
                     if(
@@ -1755,7 +1757,7 @@ function autoMap() {
             }
         } else if (game.global.preMapsActive) {
             if (shouldDoMap == "world") {
-                mapsClicked();
+                mapsClicked();  //go back
             } 
             else if (shouldDoMap == "create") {
                 if (needPrestige)
@@ -1914,8 +1916,6 @@ function autoPortal() {
             if(!game.global.challengeActive) {
                 pushData();
                 doPortal(autoTrimpSettings.AutoPortal.selected);
-                doPrison = false;
-                doWonderland = false;
             }
             break;
         default:
@@ -2094,7 +2094,7 @@ function mainLoop() {
     if (getPageSetting('AutoStance')) autoStance();
         //if autostance is not on, we should do base calculations here so stuff like automaps still works
     else {
-        baseDamage = game.global.soldierCurrentAttack * 2 * (1 + (game.global.achievementBonus / 100)) * ((game.global.antiStacks * game.portal.Anticipation.level * game.portal.Anticipation.modifier) + 1) * (1 + (game.global.roboTrimpLevel * 0.2));
+        baseDamage = game.global.soldierCurrentAttack * (1 + (game.global.achievementBonus / 100)) * ((game.global.antiStacks * game.portal.Anticipation.level * game.portal.Anticipation.modifier) + 1) * (1 + (game.global.roboTrimpLevel * 0.2));
         if (game.global.formation == 2) {
             baseDamage /= 4;
         } else if (game.global.formation != "0") {
