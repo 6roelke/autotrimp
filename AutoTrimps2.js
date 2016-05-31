@@ -1448,6 +1448,7 @@ function autoStance() {
         } else
             setFormation("0");
     }
+    baseDamage /= (game.global.titimpLeft > 0 ? 2 : 1); //unconsider titimp :P
 }
 
 //core function written by Belaith
