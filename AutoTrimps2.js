@@ -15,7 +15,8 @@
 var AutoTrimpsDebugTabVisible = true;
 delete game.global.messages["AutoTrimps"];  //bugfix from May27th, no need to be permanent.
 
-var runInterval = 100; //How often to loop through logicc
+var runInterval = 100; //How often to loop through logic
+var startupDelay = 2000;
 var enableDebug = true; //Spam console?
 var autoTrimpSettings = new Object();
 var bestBuilding;
@@ -24,9 +25,7 @@ var breedFire = false;
 var shouldFarm = false;
 var enoughDamage = true;
 var enoughHealth = true;
-
-var noFight = 0;
-
+var stopScientistsatFarmers;
 
 var baseDamage = 0;
 var baseBlock = 0;
@@ -1296,17 +1295,13 @@ function manualLabor() {
 //function written by Belaith
 function autoStance() {
     if (game.global.gridArray.length === 0) return;
-    var missingHealth = game.global.soldierHealthMax - game.global.soldierHealth;
-    var newSquadRdy = game.resources.trimps.realMax() <= game.resources.trimps.owned + 1;
 
-    
     baseDamage = game.global.soldierCurrentAttack * (1 + (game.global.achievementBonus / 100)) * ((game.global.antiStacks * game.portal.Anticipation.level * game.portal.Anticipation.modifier) + 1) * (1 + (game.global.roboTrimpLevel * 0.2));
     if (game.global.formation == 2) {
         baseDamage /= 4;
     } else if (game.global.formation != "0") {
         baseDamage *= 2;
     }
-
     //baseBlock
     baseBlock = game.global.soldierCurrentBlock;
     if (game.global.formation == 3) {
@@ -1314,7 +1309,6 @@ function autoStance() {
     } else if (game.global.formation != "0") {
         baseBlock *= 2;
     }
-
     //baseHealth
     baseHealth = game.global.soldierHealthMax;
     if (game.global.formation == 1) {
@@ -1322,7 +1316,13 @@ function autoStance() {
     } else if (game.global.formation != "0") {
         baseHealth *= 2;
     }
+    //no need to continue
+    if (!getPageSetting('AutoStance')) return;
 
+    //start analyzing autostance
+    var missingHealth = game.global.soldierHealthMax - game.global.soldierHealth;
+    var newSquadRdy = game.resources.trimps.realMax() <= game.resources.trimps.owned + 1;
+    
     if (!game.global.mapsActive && !game.global.preMapsActive) {
         var enemy;
         if (typeof game.global.gridArray[game.global.lastClearedCell + 1] === 'undefined') {
@@ -1469,7 +1469,7 @@ function autoMap() {
     var mapbonusmulti = 1 + (0.20*game.global.mapBonus);
     baseDamage *= mapbonusmulti;
     
-    //farm between 20 and 32)
+    //farm between 20 and 32
     if(!getPageSetting('DisableFarm')) {
         shouldFarm = shouldFarm ? getEnemyMaxHealth(game.global.world) / baseDamage > 20 : getEnemyMaxHealth(game.global.world) / baseDamage > 32;
     }
@@ -1559,7 +1559,6 @@ function autoMap() {
                 mapsClicked();
                 mapsClicked();
             }
-
         }
         else stackingTox = false;
         
@@ -1680,9 +1679,9 @@ function autoMap() {
                 }
                 //other unique maps here
             }
-            
-
         }
+        
+        
         //map if we don't have health/dmg or we need to clear void maps or if we are prestige mapping, and our set item has a new prestige available 
         if (shouldDoMaps || doVoids || needPrestige) {
             //shouldDoMap = world here if we haven't set it to create yet, meaning we found appropriate high level map, or siphon map
@@ -1929,9 +1928,7 @@ function autoPortal() {
             break;
         default:
             break;
-
     }
-
 }
 
 
@@ -2036,12 +2033,6 @@ function manageGenes() {
     else if ((targetBreed < getBreedTime(true) || (game.resources.trimps.soldiers == 0 && getBreedTime(true) > 6)) && breedFire == false && getPageSetting('BreedFire') && game.global.world > 10) {
         breedFire = true;
     }
-    /*    
-        //really should be integrated with the buyBuildings routine instead of here, but I think it's mostly harmless here
-        else if (targetBreed < getBreedTime() && getPageSetting('ManageBreedtimer') && !game.buildings.Nursery.locked) {
-            safeBuyBuilding('Nursery');
-        }
-    */
 
     //reset breedFire once we have less than 2 seconds remaining
     if(getBreedTime(true) < 2) breedFire = false;
@@ -2063,31 +2054,33 @@ function autoRoboTrimp() {
 
 
 ////////////////////////////////////////
-//Logic Loop////////////////////////////
+//Main Logic Loop///////////////////////
 ////////////////////////////////////////
 
+setTimeout(delayStart, startupDelay);
+function delayStart() {
+    initializeAutoTrimps();
+    setTimeout(delayStartAgain, startupDelay);
+}
+function delayStartAgain(){
+    setInterval(mainLoop, runInterval);
+    updateCustomButtons();
+}
 
-
-//This is totally cheating Only use for debugging
-// game.settings.speed = 1;
-// game.settings.speedTemp = 1;
-// setTimeout(function() {
-//     game.settings.speed = 2;
-// }, 1000);
-
-setTimeout(delayStart, 2000);
-
-var stopScientistsatFarmers = 250000;
 function mainLoop() {
     stopScientistsatFarmers = 250000;   //put this here so it reverts every cycle (in case we portal out of watch challenge)
     game.global.addonUser = true;
     if(getPageSetting('PauseScript')) return;
     if(game.global.viewingUpgrades) return;
-    setTitle();
-    setScienceNeeded();
-    updateValueFields();
+    //auto-close breaking the world textbox
+    if(document.getElementById('tipTitle').innerHTML == 'The Improbability') cancelTooltip();
+    //auto-close the corruption at zone 181 textbox
+    if(document.getElementById('tipTitle').innerHTML == 'Corruption') cancelTooltip();
+    setTitle();          //set the browser title
+    setScienceNeeded();  //determine how much science is needed
+    updateValueFields(); //refresh the UI
 
-    if (getPageSetting('EasyMode')) easyMode(); //This needs a UI input
+    if (getPageSetting('EasyMode')) easyMode();
     if (getPageSetting('BuyUpgrades')) buyUpgrades();
     if (getPageSetting('BuyStorage')) buyStorage();
     if (getPageSetting('BuyBuildings')) buyBuildings();
@@ -2099,35 +2092,8 @@ function mainLoop() {
     if (getPageSetting('AutoHeirlooms')) autoHeirlooms();
     if (getPageSetting('TrapTrimps') && game.global.trapBuildAllowed && game.global.trapBuildToggled == false) toggleAutoTrap();
     if (getPageSetting('AutoRoboTrimp')) autoRoboTrimp();
-    
-    if (getPageSetting('AutoStance')) autoStance();
-        //if autostance is not on, we should do base calculations here so stuff like automaps still works
-    else {
-        baseDamage = game.global.soldierCurrentAttack * (1 + (game.global.achievementBonus / 100)) * ((game.global.antiStacks * game.portal.Anticipation.level * game.portal.Anticipation.modifier) + 1) * (1 + (game.global.roboTrimpLevel * 0.2));
-        if (game.global.formation == 2) {
-            baseDamage /= 4;
-        } else if (game.global.formation != "0") {
-            baseDamage *= 2;
-        }
-        //baseBlock
-        baseBlock = game.global.soldierCurrentBlock;
-        if (game.global.formation == 3) {
-            baseBlock /= 4;
-        } else if (game.global.formation != "0") {
-            baseBlock *= 2;
-        }
-        //baseHealth
-        baseHealth = game.global.soldierHealthMax;
-        if (game.global.formation == 1) {
-            baseHealth /= 4;
-        } else if (game.global.formation != "0") {
-            baseHealth *= 2;
-        }
-    }
-    //auto-close breaking the world textbox
-    if(document.getElementById('tipTitle').innerHTML == 'The Improbability') cancelTooltip();
     autoLevelEquipment();
-
+    autoStance();
     if (getPageSetting('AutoFight')) {
         //Manually fight instead of using builtin auto-fight
         if (game.global.autoBattle) {
@@ -2141,18 +2107,6 @@ function mainLoop() {
             // debug('triggered fight');
         }
     }
-    if(game.resources.trimps.soldiers == 0) noFight ++;
-
-}
-
-function delayStart() {
-    initializeAutoTrimps();
-    setTimeout(delayStartAgain, 2000);
-}
-function delayStartAgain(){
-    setInterval(mainLoop, runInterval);
-    updateCustomButtons();
-    //setInterval(updateCustomButtons, 10000);
 }
 
 //we copied message function because this was not able to be called from function debug() without getting a weird scope? related "cannot find function" error.
@@ -2195,7 +2149,7 @@ function message2(messageString, type, lootIcon, extraClass) {
 }
 
 //HTML For adding a 5th tab to the message window
-
+//
 var ATbutton = document.createElement("button");
 ATbutton.innerHTML = 'AutoTrimps';
 ATbutton.setAttribute('id', 'AutoTrimpsFilter');
