@@ -1472,8 +1472,18 @@ function autoMap() {
     if(!getPageSetting('DisableFarm')) {
         shouldFarm = shouldFarm ? getEnemyMaxHealth(game.global.world) / baseDamage > 20 : getEnemyMaxHealth(game.global.world) / baseDamage > 32;
     }
-
-    needToVoid = getPageSetting('VoidMaps') > 0 && game.global.totalVoidMaps > 0 && ((game.global.world == getPageSetting('VoidMaps') && !getPageSetting('RunNewVoids')) || (game.global.world >= getPageSetting('VoidMaps') && getPageSetting('RunNewVoids'))) && (game.global.challengeActive != 'Lead' || game.global.lastClearedCell > 95);
+    //DECIMAL VOID MAPS:
+    var voidMapLevelSetting = getPageSetting('VoidMaps');
+    //using string function to avoid false float precision (0.29999999992). javascript can compare ints to strings anyway.
+    var voidMapLevelSettingZone = (voidMapLevelSetting+"").split(".")[0];
+    var voidMapLevelSettingMap = (voidMapLevelSetting+"").split(".")[1];
+    if (voidMapLevelSettingMap === undefined || game.global.challengeActive == 'Lead') 
+        voidMapLevelSettingMap = 95;
+    if (voidMapLevelSettingMap.length == 1) voidMapLevelSettingMap += "0";  //entering 187.70 becomes 187.7, this will bring it back to 187.70
+    needToVoid = voidMapLevelSetting > 0 && game.global.totalVoidMaps > 0 && game.global.lastClearedCell + 1 >= voidMapLevelSettingMap && 
+                                ((game.global.world == voidMapLevelSettingZone && !getPageSetting('RunNewVoids')) 
+                                                                || 
+                                 (game.global.world >= voidMapLevelSettingZone && getPageSetting('RunNewVoids')));
     if (game.global.mapsUnlocked) {
         var enemyDamage = getEnemyMaxAttack(game.global.world + 1, 30, 'Snimp', .85);
         var enemyHealth = getEnemyMaxHealth(game.global.world + 1);
@@ -1540,10 +1550,9 @@ function autoMap() {
         //stack tox stacks if heliumGrowing has been set to true, or if we need to clear our void maps
         if(game.global.challengeActive == 'Toxicity' && game.global.lastClearedCell > 93 && game.challenges.Toxicity.stacks < 1500 && ((getPageSetting('MaxTox') && game.global.world > 59) || needToVoid)) {
             shouldDoMaps = true;
-            if (needToVoid && game.challenges.Toxicity.stacks > 1415)   //we willl get at least 85 toxstacks from the 1st voidmap
-                stackingTox = false;
-            else 
-                stackingTox = true;
+            //we willl get at least 85 toxstacks from the 1st voidmap
+            stackingTox = !(needToVoid && game.challenges.Toxicity.stacks > 1415);
+
             //force abandon army
             if(!game.global.mapsActive && !game.global.preMapsActive) {
                 mapsClicked();
