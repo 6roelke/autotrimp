@@ -1807,41 +1807,47 @@ function autoMap() {
                 if(shouldFarm) {
                     biomeAdvMapsSelect.value = "Mountain";
                     while (sizeAdvMapsRange.value > 0 && updateMapCost(true) > game.resources.fragments.owned) {
-                        sizeAdvMapsRange.value = sizeAdvMapsRange.value - 1;
+                        sizeAdvMapsRange.value -= 1;
                     }
                     while (lootAdvMapsRange.value > 0 && updateMapCost(true) > game.resources.fragments.owned) {
-                        lootAdvMapsRange.value = lootAdvMapsRange.value - 1;
+                        lootAdvMapsRange.value -= 1;
                     }
                 } else {
                     while (lootAdvMapsRange.value > 0 && updateMapCost(true) > game.resources.fragments.owned) {
-                        lootAdvMapsRange.value = lootAdvMapsRange.value - 1;
+                        lootAdvMapsRange.value -= 1;
                     }
                     //prioritize size over difficulty? Not sure. high Helium that just wants prestige = yes.
                     //Really just trying to prevent prestige mapping from getting stuck
                     while (difficultyAdvMapsRange.value > 0 && updateMapCost(true) > game.resources.fragments.owned) {
-                        difficultyAdvMapsRange.value = difficultyAdvMapsRange.value - 1;
+                        difficultyAdvMapsRange.value -= 1;
                     }
                 }
-                //if we can't afford the map we designed, pick our highest map
                 if (updateMapCost(true) > game.resources.fragments.owned) {
-                    selectMap(game.global.mapsOwnedArray[highestMap].id);
+                    //if we can't afford the map we designed, pick our highest map                    
+                    var map = game.global.mapsOwnedArray[highestMap];
+                    selectMap(map.id);
                     debug("Can't afford the map we designed, #" + document.getElementById("mapLevelInput").value, '*crying2');
-                    debug("..picking our highest map:# " + game.global.mapsOwnedArray[highestMap].id + " Level: " + game.global.mapsOwnedArray[highestMap].level, '*happy2');
-                    runMap();
+                    debug("..picking our highest map:# " + map.id + " Level: " + map.level, '*happy2');
                 } else {
                     debug("BUYING a Map, level: #" + document.getElementById("mapLevelInput").value, 'th-large');
                     var result = buyMap();
                     if(result == -2){
-                        debug("Too many maps, recycling now: ", 'th-large');
+                        debug("Too many maps, recycling now: ", '*crying2');
                         recycleBelow(true);
                         debug("Retrying BUYING a Map, level: #" + document.getElementById("mapLevelInput").value, 'th-large');
                         buyMap();
                     }
+                    //the map we just bought should be the last map in the array, so just select it now
+                    var map = game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1];
+                    selectMap(map.id);
                 }
-                //if we already have a map picked, run it
+                //and run it.
+                debug("RUNNING newly created map:# " + map.id + " Level: " + map.level + " Name: " + map.name, 'th-large');                
+                runMap();
             } else {
+                //if we already have a map picked, run it (probably a unique or a void at this point)
                 selectMap(shouldDoMap);
-                debug("Already have a map picked: Running map:# " + shouldDoMap + 
+                debug("ALREADY have a map picked: Running map:# " + shouldDoMap + 
                     " Level: " + game.global.mapsOwnedArray[getMapIndex(shouldDoMap)].level +
                     " Name: " + game.global.mapsOwnedArray[getMapIndex(shouldDoMap)].name, 'th-large');
                 runMap();
@@ -1967,11 +1973,11 @@ function checkSettings() {
     if(portalLevel == -1)
         return;
     if(autoTrimpSettings.VoidMaps.value >= portalLevel) {
-        tooltip('confirm', null, 'update', 'It looks like your void maps may be set to complete after your autoPortal. Your void maps may not be done at all in this case. Please verify your settings. Remember you can choose \'Custom\' autoPortal along with challenges for complete control over when you portal. <br><br> Estimated autoPortal level: ' + portalLevel , 'cancelTooltip()', 'Void Maps Conflict');
+        tooltip('confirm', null, 'update', 'WARNING: Your void maps are set to complete after your autoPortal, and therefore will not be done at all! Please verify your settings. Remember you can choose \'Custom\' autoPortal along with challenges for complete control over when you portal. <br><br> Estimated autoPortal level: ' + portalLevel , 'cancelTooltip()', 'Void Maps Conflict');
         return;
     }
     if((leadCheck || game.global.challengeActive == 'Lead') && (autoTrimpSettings.VoidMaps.value % 2 == 0 && portalLevel < 182))
-        tooltip('confirm', null, 'update', 'It looks like you may be on the Lead challenge or planning to run it and your void maps are set to complete on an even zone. You will receive double helium for completeing them in an odd numbered zone. Consider changing this.', 'cancelTooltip()', 'Lead Challenge Void Maps');
+        tooltip('confirm', null, 'update', 'WARNING: Voidmaps run during Lead on an Even zone do not receive the 2x Helium Bonus for Odd zones, and are also tougher. You should probably fix this.', 'cancelTooltip()', 'Lead Challenge Void Maps');
 }
 
 function doPortal(challenge) {
