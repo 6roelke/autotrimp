@@ -1503,8 +1503,7 @@ function autoMap() {
         enoughHealth = (baseHealth * 4 > 30 * (enemyDamage - baseBlock / 2 > 0 ? enemyDamage - baseBlock / 2 : enemyDamage * (0.2 + pierceMod))
                         || 
                         baseHealth > 30 * (enemyDamage - baseBlock > 0 ? enemyDamage - baseBlock : enemyDamage * (0.2 + pierceMod)));
-        console.log("EnoughHealth: " + enoughHealth + " " + enemyDamage + " " + baseDamage);                  
-        enoughDamage = baseDamage * 4 > enemyHealth;
+        enoughDamage = baseDamage * 8 > enemyHealth;
         HDratio = enemyHealth / baseDamage;
         //prevents map-screen from flickering on and off during startup when base damage is 0.
         if (baseDamage > 0){
