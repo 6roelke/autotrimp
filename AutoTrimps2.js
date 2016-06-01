@@ -13,7 +13,6 @@
 //Variables/////////////////////////////
 ////////////////////////////////////////
 var AutoTrimpsDebugTabVisible = true;
-delete game.global.messages["AutoTrimps"];  //bugfix from May27th, no need to be permanent.
 
 var runInterval = 100; //How often to loop through logic
 var startupDelay = 2000;
@@ -219,12 +218,10 @@ function postBuy() {
 }
 
 function safeBuyBuilding(building) {
-    //exclude housing from 1 per queue limit?
+    //limit to 1 building per queue
     for (var b in game.global.buildingsQueue) {
         if (game.global.buildingsQueue[b].includes(building)) return false;
     }
-   
-    
     preBuy();
     game.global.buyAmt = 1;
     if (!canAffordBuilding(building)) {
@@ -366,13 +363,9 @@ function sortHeirlooms(){
                 return worth[x][b] - worth[x][a];
         });
     }
-    // console.log(worth);
-    //console.log('hat: ' + worth['Shield']);
-    //console.log('staff: ' + worth['Staff']);
 }
 
-
-
+//Automatically evaluate and carry the best heirlooms, and recommend upgrades for equipped items. AutoHeirlooms will only change carried items when the heirlooms window is not open. Carried items will be compared and swapped with the types that are already carried. If a carry spot is empty, it will be filled with the best shield (if available). Evaluation is based ONLY on the following mods (listed in order of priority, high to low): Void Map Drop Chance/Trimp Attack, Crit Chance/Crit Damage, Miner Efficiency/Metal Drop, Gem Drop/Dragimp Efficiency, Farmer/Lumberjack Efficiency. For the purposes of carrying, rarity trumps all of the stat evaluations. Empty mod slots are valued at the average value of the best missing mod.
 function autoHeirlooms() {
     var bestUpgrade;
     if(!heirloomsShown && game.global.heirloomsExtra.length > 0){
@@ -423,6 +416,7 @@ function autoHeirlooms() {
     //advBtn.setAttribute("onmouseover", 'tooltip(\"Advanced Settings\", \"customText\", event, \"Leave off unless you know what you\'re doing with them.\")');
 }
 
+//Determines the best heirloom mods
 function evaluateMods(loom, location, upgrade) {
     var index = loom;
     var bestUpgrade = {
@@ -630,6 +624,7 @@ function evaluateMods(loom, location, upgrade) {
     return eff;
 }
 
+//Heirloom helper function
 function checkForMod(what, loom, location){
     var heirloom = game.global[location][loom];
     for (var mod in heirloom.mods){
@@ -638,8 +633,7 @@ function checkForMod(what, loom, location){
     return false;
 }
 
-
-
+//back end function for autoLevelEquipment to determine most cost efficient items, and what color they should be.
 function evaluateEfficiency(equipName) {
     var equip = equipmentList[equipName];
     var gameResource = equip.Equip ? game.equipment[equipName] : game.buildings[equipName];
@@ -718,6 +712,7 @@ function evaluateEfficiency(equipName) {
     };
 }
 
+//Returns the amount of stats that the equipment (or gym) will give when bought.
 function Effect(gameResource, equip) {
     if (equip.Equip) {
         return gameResource[equip.Stat + 'Calculated'];
@@ -730,6 +725,7 @@ function Effect(gameResource, equip) {
     }
 }
 
+//Returns the cost after Artisanistry of a piece of equipment.
 function Cost(gameResource, equip) {
     preBuy();
     game.global.buyAmt = 1;
@@ -739,6 +735,7 @@ function Cost(gameResource, equip) {
     return price;
 }
 
+//Returns the amount of stats that the prestige will give when bought.
 function PrestigeValue(what) {
     var name = game.upgrades[what].prestiges;
     var equipment = game.equipment[name];
