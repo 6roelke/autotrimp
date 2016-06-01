@@ -109,6 +109,7 @@ createSetting('DynamicSiphonology', 'Dynamic Siphonology', 'Use the right level 
 createSetting('FarmWhenNomStacks7', 'Farm on >7 NomStacks', 'On Improbability(cell 100). Meant to be used with DisableFarming (otherwise farming would take care of this, but its slower). If Improbability already has 5 NomStacks, stack 30 Anticipation. If the Improbability has >7 NomStacks on it, get +200% dmg from MapBonus. If we still cant kill it, enter Farming mode at 30 stacks, Even with DisableFarming On!', 'boolean', null, null, 'genbtcadvancedSettings');
 createSetting('AutoRoboTrimp', 'AutoRoboTrimp', 'Use RoboTrimps ability starting at this level, and every 5 levels thereafter. (set to 0 to disable)', 'value', '0', null, 'genbtcadvancedSettings');
 createSetting('HeliumHrBuffer', 'Helium/Hr Buffer %', 'When using the He/Hr Autoportal, it will portal if your He/Hr drops below a certain % of your best for current run, default is 0%', 'value', '0', null, 'genbtcadvancedSettings');
+createSetting('FarmingCutoff', 'Farming Cutoff', 'The script will farm if enemyHealth/baseDamage rises above this number.', 'value', '0', null, 'genbtcadvancedSettings');
 
 //Manage importexport Settings - Create button.
 var importexportBtn = document.createElement("DIV");
@@ -134,7 +135,7 @@ createSetting('DefaultAutoTrimps', 'Reset to Default', 'Reset everything to the 
 createSetting('PauseScript', 'Pause AutoTrimps', 'Pause AutoTrimps (not including the graphs module)', 'boolean', null, null, 'pause');
 
 function loadAutoTrimps() {
-    var thestring = document.getElementById("importBox").value.replace(/(\r\n|\n|\r|\s)/gm,"")
+    var thestring = document.getElementById("importBox").value.replace(/(\r\n|\n|\r|\s)/gm,"");
     var tmpset = JSON.parse(thestring);
     if (tmpset == null)
         return;
@@ -161,7 +162,7 @@ function AutoTrimpsTooltip(what, isItIn, event) {
 	var costText = "";
 	if (what == "ExportAutoTrimps"){
 		tooltipText = "This is your AUTOTRIMPS save string. There are many like it but this one is yours. Save this save somewhere safe so you can save time next time. <br/><br/><textarea id='exportArea' style='width: 100%' rows='5'>" + JSON.stringify(autoTrimpSettings) + "</textarea>";
-		costText = "<div class='maxCenter'><div id='confirmTooltipBtn' class='btn btn-info' onclick='cancelTooltip()'>Got it</div>"
+        costText = "<div class='maxCenter'><div id='confirmTooltipBtn' class='btn btn-info' onclick='cancelTooltip()'>Got it</div>";
 		if (document.queryCommandSupported('copy')){
 			costText += "<div id='clipBoardBtn' class='btn btn-success'>Copy to Clipboard</div>";
 			ondisplay = function(){
@@ -174,9 +175,13 @@ function AutoTrimpsTooltip(what, isItIn, event) {
 						document.getElementById('clipBoardBtn').innerHTML = "Error, not copied";
 					  }
 				});
-			}
+            };
 		}
-		else ondisplay = function () {document.getElementById('exportArea').select}
+        else {
+            ondisplay = function(){
+                document.getElementById('exportArea').select();
+            };
+		}
 		costText += "</div>";
 	}
 	if (what == "ImportAutoTrimps"){
@@ -185,7 +190,7 @@ function AutoTrimpsTooltip(what, isItIn, event) {
 		costText="<div class='maxCenter'><div id='confirmTooltipBtn' class='btn btn-info' onclick='cancelTooltip(); loadAutoTrimps();'>Import</div><div class='btn btn-info' onclick='cancelTooltip()'>Cancel</div></div>";
 		ondisplay = function () {
 			document.getElementById('importBox').focus();
-		}   
+        };
     }
     if (what == "DefaultAutoTrimps"){
         localStorage.removeItem('autoTrimpSettings');
@@ -250,7 +255,7 @@ function automationMenuInit() {
    //shrink padding for fight buttons to help fit automaps button/status
    	var btns = document.getElementsByClassName("fightBtn");
 		for (var x = 0; x < btns.length; x++){
-			btns[x].style.padding = "0.01vw 0.01vw"
+        btns[x].style.padding = "0.01vw 0.01vw";
 		}
 
 }
@@ -340,7 +345,7 @@ function createSetting(id, name, description, type, defaultValue, list, containe
         btn.setAttribute("onmouseover", 'tooltip(\"' + name + '\", \"customText\", event, \"' + description + '\")');
         btn.setAttribute("onmouseout", 'tooltip("hide")');
         btn.textContent = name;
-        btnParent.appendChild(btn)
+        btnParent.appendChild(btn);
         if(container) document.getElementById(container).appendChild(btnParent);
         else document.getElementById("autoSettings").appendChild(btnParent);
     } else if (type == 'dropdown') {
@@ -370,7 +375,7 @@ function createSetting(id, name, description, type, defaultValue, list, containe
             btn.appendChild(option);
         }
         btn.value = autoTrimpSettings[id].selected;
-        btnParent.appendChild(btn)
+        btnParent.appendChild(btn);
         
         if(container) document.getElementById(container).appendChild(btnParent);
         else document.getElementById("autoSettings").appendChild(btnParent);
@@ -379,7 +384,7 @@ function createSetting(id, name, description, type, defaultValue, list, containe
         btn.setAttribute("onclick", 'AutoTrimpsTooltip(\'' + defaultValue + '\', null, \'update\')');
         btn.textContent = name;
         btnParent.style.width = '';
-        btnParent.appendChild(btn)
+        btnParent.appendChild(btn);
         if(container) document.getElementById(container).appendChild(btnParent);
         else document.getElementById("autoSettings").appendChild(btnParent);
     }        

@@ -172,9 +172,9 @@ function setGraph(title, xTitle, yTitle, valueSuffix, formatter, series, yType) 
 function setColor(tmp) {
     for (var i in tmp) {
         if (i == tmp.length - 1) {
-            tmp[i].color = '#FF0000' //Current run is in red
+            tmp[i].color = '#FF0000'; //Current run is in red
         } else {
-            tmp[i].color = '#90C3D4' //Old runs are in blue
+            tmp[i].color = '#90C3D4'; //Old runs are in blue
         }
     }
     return tmp;
@@ -255,7 +255,7 @@ function setGraphData(graph) {
                     graphData.push({
                         name: 'Portal ' + allSaveData[i].totalPortals + ': ' + allSaveData[i].challenge,
                         data: []
-                    })
+                    });
                     currentPortal = allSaveData[i].totalPortals;
                     //push a 0 to index 0 so that clear times line up with x-axis numbers
                     graphData[graphData.length -1].data.push(0);
@@ -290,7 +290,7 @@ function setGraphData(graph) {
                     graphData.push({
                         name: 'Portal ' + allSaveData[i].totalPortals + ': ' + allSaveData[i].challenge,
                         data: []
-                    })
+                    });
                     currentPortal = allSaveData[i].totalPortals;
                 }
                 graphData[graphData.length - 1].data.push(allSaveData[i].heliumOwned);
@@ -309,7 +309,7 @@ function setGraphData(graph) {
                     graphData.push({
                         name: 'Portal ' + allSaveData[i].totalPortals + ': ' + allSaveData[i].challenge,
                         data: []
-                    })
+                    });
                     currentPortal = allSaveData[i].totalPortals;
                     if(allSaveData[i].world == 1)
                         graphData[graphData.length -1].data.push(0);
@@ -460,21 +460,21 @@ function setGraphData(graph) {
                     graphData.push({
                         name: 'Portal ' + allSaveData[i].totalPortals + ': ' + allSaveData[i].challenge,
                         data: []
-                    })
+                    });
                     currentPortal = allSaveData[i].totalPortals;
                 }
                 graphData[graphData.length - 1].data.push(allSaveData[i].voids);
             }
             title = 'Void Map History';
             xTitle = 'Zone';
-            yTitle = 'Number of Void Maps'
+            yTitle = 'Number of Void Maps';
             yType = 'Linear';
             break;
                
             
             title = 'MetalCost of Equipment to Buildings\' Ratio - (Artisan vs Resourceful)';
             xTitle = 'Zone';
-            yTitle = 'Percent'
+            yTitle = 'Percent';
             yType = 'Linear';
             break;
             
@@ -486,7 +486,7 @@ function setGraphData(graph) {
                     graphData.push({
                         name: 'Portal ' + allSaveData[i].totalPortals + ': ' + allSaveData[i].challenge,
                         data: []
-                    })
+                    });
                     currentPortal = allSaveData[i].totalPortals;
                 }
                 if (allSaveData[i].coord)
@@ -494,7 +494,7 @@ function setGraphData(graph) {
             }
             title = 'Coordination History';
             xTitle = 'Zone';
-            yTitle = 'Coordination'
+            yTitle = 'Coordination';
             yType = 'Linear';
             break;
             
@@ -506,7 +506,7 @@ function setGraphData(graph) {
                     graphData.push({
                         name: 'Portal ' + allSaveData[i].totalPortals + ': ' + allSaveData[i].challenge,
                         data: []
-                    })
+                    });
                     currentPortal = allSaveData[i].totalPortals;
                 }
                 if (allSaveData[i].gigas >= 0)
@@ -514,7 +514,7 @@ function setGraphData(graph) {
             }
             title = 'Gigastation History';
             xTitle = 'Zone';
-            yTitle = 'Number of Gigas'
+            yTitle = 'Number of Gigas';
             yType = 'Linear';
             break;
 
@@ -526,7 +526,7 @@ function setGraphData(graph) {
                     graphData.push({
                         name: 'Portal ' + allSaveData[i].totalPortals + ': ' + allSaveData[i].challenge,
                         data: []
-                    })
+                    });
                     currentPortal = allSaveData[i].totalPortals;
                 }
                 if (allSaveData[i].lastwarp >= 0)
@@ -534,7 +534,7 @@ function setGraphData(graph) {
             }
             title = 'Warpstation History';
             xTitle = 'Zone';
-            yTitle = 'Previous Giga\'s Number of Warpstations'
+            yTitle = 'Previous Giga\'s Number of Warpstations';
             yType = 'Linear';
             break; 
 
@@ -546,7 +546,7 @@ function setGraphData(graph) {
                     graphData.push({
                         name: 'Portal ' + allSaveData[i].totalPortals + ': ' + allSaveData[i].challenge,
                         data: []
-                    })
+                    });
                     currentPortal = allSaveData[i].totalPortals;
                 }
                 if (allSaveData[i].trimps >= 0)
@@ -554,7 +554,7 @@ function setGraphData(graph) {
             }
             title = 'Total Trimps';
             xTitle = 'Zone';
-            yTitle = 'Cumulative Number of Trimps'
+            yTitle = 'Cumulative Number of Trimps';
             yType = 'Linear';
             break;                        
                         

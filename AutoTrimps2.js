@@ -271,7 +271,7 @@ function highlightHousing() {
             }
         }
         var keysSorted = Object.keys(obj).sort(function(a, b) {
-            return obj[a] - obj[b]
+            return obj[a] - obj[b];
         });
         bestBuilding = null;
         //loop through the array and find the first one that isn't limited by max settings
@@ -1466,9 +1466,13 @@ function autoMap() {
     var mapbonusmulti = 1 + (0.20*game.global.mapBonus);
     baseDamage *= mapbonusmulti;
     
+    var farmingcutoff = getPageSetting('FarmingCutoff');
     //farm between 20 and 32
     if(!getPageSetting('DisableFarm')) {
         shouldFarm = shouldFarm ? getEnemyMaxHealth(game.global.world) / baseDamage > 20 : getEnemyMaxHealth(game.global.world) / baseDamage > 32;
+    }
+    if(farmingcutoff) {
+        shouldFarm = getEnemyMaxHealth(game.global.world) / baseDamage > farmingcutoff;
     }
     //DECIMAL VOID MAPS:
     var voidMapLevelSetting = getPageSetting('VoidMaps');
@@ -1515,7 +1519,7 @@ function autoMap() {
         HDratio = enemyHealth / baseDamage;
         //prevents map-screen from flickering on and off during startup when base damage is 0.
         if (baseDamage > 0){
-            var shouldDoMaps = !enoughHealth || !enoughDamage;
+            var shouldDoMaps = !enoughHealth || !enoughDamage || shouldFarm;
         }
         var shouldDoMap = "world";
         
@@ -1589,7 +1593,7 @@ function autoMap() {
             }
         }
         var keysSorted = Object.keys(obj).sort(function(a, b) {
-            return obj[b] - obj[a]
+            return obj[b] - obj[a];
         });
         //if there are no non-unique maps, there will be nothing in keysSorted, so set to create a map
         if (keysSorted[0]) var highestMap = keysSorted[0];
@@ -1896,7 +1900,7 @@ function autoPortal() {
             game.stats.bestHeliumHourThisRun.evaluate();    //normally, evaluate() is only called once per second, but the script runs at 10x a second.
             if(game.global.world > game.stats.bestHeliumHourThisRun.atZone) {
                 var bestHeHr = game.stats.bestHeliumHourThisRun.storedValue;
-                var myHeliumHr = game.stats.heliumHour.value()
+                var myHeliumHr = game.stats.heliumHour.value();
                 var heliumHrBuffer = Math.abs(getPageSetting('HeliumHrBuffer'));
                 if(myHeliumHr < bestHeHr * (1-(heliumHrBuffer/100)) && !game.global.challengeActive) {
                     debug("My Helium was: " + myHeliumHr + " & the Best Helium was: " + bestHeHr);
