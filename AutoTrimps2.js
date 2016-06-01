@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AutoTrimpsV2+genBTC-BetaDev
 // @namespace    http://tampermonkey.net/
-// @version      2.1.2b-genbtc-BETA-5-28-2016
+// @version      2.1.2c-genbtc-BETA-6-01-2016
 // @description  try to take over the world!
 // @author       zininzinin, spindrjr, belaith, ishakaru, genBTC
 // @include        *trimps.github.io*
@@ -703,6 +703,9 @@ function evaluateEfficiency(equipName) {
     if (game.global.world >= 58 && game.global.world < 60 && getPageSetting('WaitTill60')){
         Wall = true;
     }
+    if (gameResource.level < 2 && equip.Stat == 'health' && getPageSetting('AlwaysArmorLvl2')){
+        Res = 9999 - gameResource.prestige;
+    }
 
     return {
         Stat: equip.Stat,
@@ -1180,21 +1183,27 @@ function autoLevelEquipment() {
     game.global.buyAmt = 1;
     for (var stat in Best) {
         if (Best[stat].Name !== '') {
-            var DaThing = equipmentList[Best[stat].Name];
+            var eqName = Best[stat].Name;
+            var DaThing = equipmentList[eqName];
             document.getElementById(Best[stat].Name).style.color = Best[stat].Wall ? 'orange' : 'red';
             //If we're considering an attack item, we want to buy weapons if we don't have enough damage, or if we don't need health (so we default to buying some damage)
             if (getPageSetting('BuyWeapons') && DaThing.Stat == 'attack' && (!enoughDamageE || enoughHealthE)) {
-                if (DaThing.Equip && !Best[stat].Wall && canAffordBuilding(Best[stat].Name, null, null, true)) {
-                    debug('Leveling equipment ' + Best[stat].Name, '*upload3');
-                    buyEquipment(Best[stat].Name, null, true);
+                if (DaThing.Equip && !Best[stat].Wall && canAffordBuilding(eqName, null, null, true)) {
+                    debug('Leveling equipment ' + eqName, '*upload3');
+                    buyEquipment(eqName, null, true);
                 }
             }
             //If we're considering a health item, buy it if we don't have enough health, otherwise we default to buying damage
             if (getPageSetting('BuyArmor') && (DaThing.Stat == 'health' || DaThing.Stat == 'block') && !enoughHealthE) {
-                if (DaThing.Equip && !Best[stat].Wall && canAffordBuilding(Best[stat].Name, null, null, true)) {
-                    debug('Leveling equipment ' + Best[stat].Name, '*upload3');
-                    buyEquipment(Best[stat].Name, null, true);
+                if (DaThing.Equip && !Best[stat].Wall && canAffordBuilding(eqName, null, null, true)) {
+                    debug('Leveling equipment ' + eqName, '*upload3');
+                    buyEquipment(eqName, null, true);
                 }
+            if (getPageSetting('BuyArmor') && (DaThing.Stat == 'health') && getPageSetting('AlwaysArmorLvl2') && game.equipment[eqName].level < 2){
+                if (DaThing.Equip && !Best[stat].Wall && canAffordBuilding(eqName, null, null, true)) {             
+                    debug('Leveling equipment ' + eqName + " (AlwaysArmorLvl2)", '*upload3');
+                    buyEquipment(eqName, null, true);
+                } // ??idk??    && (getPageSetting('DelayArmorWhenNeeded') && enoughDamage)
             }
         }
     }
