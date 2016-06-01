@@ -1199,6 +1199,7 @@ function autoLevelEquipment() {
                     debug('Leveling equipment ' + eqName, '*upload3');
                     buyEquipment(eqName, null, true);
                 }
+            }
             if (getPageSetting('BuyArmor') && (DaThing.Stat == 'health') && getPageSetting('AlwaysArmorLvl2') && game.equipment[eqName].level < 2){
                 if (DaThing.Equip && !Best[stat].Wall && canAffordBuilding(eqName, null, null, true)) {             
                     debug('Leveling equipment ' + eqName + " (AlwaysArmorLvl2)", '*upload3');
