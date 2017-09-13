@@ -373,7 +373,9 @@ function autoLevelEquipment() {
                 document.getElementById(eqName).style.border = '2px solid red';
             }
             //If we're considering an attack item, we want to buy weapons if we don't have enough damage, or if we don't need health (so we default to buying some damage)
-            if (getPageSetting('BuyWeapons') && DaThing.Stat == 'attack' && (!enoughDamageE || enoughHealthE)) {
+            // Changed so we only buy damage if needed, else save the ressources for something else (prestiges !)           
+            //if (getPageSetting('BuyWeapons') && DaThing.Stat == 'attack' && (!enoughDamageE || enoughHealthE)) {
+            if (getPageSetting('BuyWeapons') && DaThing.Stat == 'attack' && !enoughDamageE) {
                 if (DaThing.Equip && !Best[stat].Wall && canAffordBuilding(eqName, null, null, true)) {
                     debug('Leveling equipment ' + eqName, "equips", '*upload3');
                     buyEquipment(eqName, null, true);
