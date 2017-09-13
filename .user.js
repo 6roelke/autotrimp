@@ -11,5 +11,5 @@
 
 var script = document.createElement('script');
 script.id = 'AutoTrimps-script';
-script.src = 'https://genbtc.github.io/AutoTrimps-betadev/AutoTrimps2.js';
+script.src = 'https://6roelke.github.io/autotrimp/AutoTrimps2.js';
 document.head.appendChild(script);
