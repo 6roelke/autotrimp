@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         AutoTrimps-genBTC
-// @namespace    https://github.com/genbtc/AutoTrimps-betadev
+// @namespace    https://github.com/6roelke/autotrimp
 // @version      2.1.5.2-genbtc-12-23-2016+Modular
 // @description  Automate all the trimps!
 // @author       zininzinin, spindrjr, Ishkaru, genBTC
@@ -11,5 +11,5 @@
 
 var script = document.createElement('script');
 script.id = 'AutoTrimps-script';
-script.src = 'https://genbtc.github.io/AutoTrimps-betadev/AutoTrimps2.js';
+script.src = 'https://github.com/6roelke/autotrimp/AutoTrimps2.js';
 document.head.appendChild(script);
