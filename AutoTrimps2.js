@@ -48,8 +48,8 @@ function printChangelog() {
     tooltip('confirm', null, 'update', '\
 <br>12/23 v2.1.5.2\
 <br><b><u>Report any bugs/problems please!</u></b>\
-<br><a href="https://github.com/genbtc/AutoTrimps-betadev#current-feature-changes-by-genbtc" target="#">Read the 12/20 Changelog Here</a>\
-<br><a href="https://github.com/genbtc/AutoTrimps-betadev/commits/gh-pages" target="#">Check the commit history</a> (if you care)\
+<br><a href="https://github.com/6roelke/autotrimp#current-feature-changes-by-genbtc" target="#">Read the 12/20 Changelog Here</a>\
+<br><a href="https://github.com/6roelke/autotrimp/commits/gh-pages" target="#">Check the commit history</a> (if you care)\
 ', 'cancelTooltip()', 'Script Update Notice ' + ATversion);
 }
 ////////////////////////////////////////
